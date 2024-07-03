@@ -13,6 +13,7 @@ export default async function ({ feature, console }) {
             "games": "games",
             "music": "music",
             "stories": "stories"
+            "tutorials": "tutorials"
         };
         return tabPaths[formattedName] ? `/explore/projects/${tabPaths[formattedName]}/` : "/explore/projects/all/";
     }
@@ -29,7 +30,7 @@ export default async function ({ feature, console }) {
         event.preventDefault();
         const exploreLink = event.currentTarget;
         const targetUrl = exploreLink.getAttribute('href');
-        if (targetUrl === "/explore/projects/all") {
+        if (targetUrl === "/explore/projects/all/") {
             const redirectUrl = getRedirectPath(tabName);
             window.location.href = redirectUrl || targetUrl;
         } else {
@@ -52,9 +53,5 @@ export default async function ({ feature, console }) {
             ScratchTools.storage.set("tab-name", value);
             redirectToTab();
         }
-    });
-
-    feature.addEventListener("enabled", function () {
-        redirectToTab();
     });
 }
