@@ -1,5 +1,5 @@
 export default async function ({ feature, console }) {
-    let tabName = await ScratchTools.storage.get("tab-name");
+    let name = ScratchTools.Storage.customtab;
 
     function formatTabName(name) {
         return name.trim().toLowerCase();
@@ -11,8 +11,8 @@ export default async function ({ feature, console }) {
     }
 
     function redirectToTab() {
-        if (!tabName) return;
-        const targetPath = getRedirectPath(tabName);
+        if (!name) return;
+        const targetPath = getRedirectPath(name);
         if (window.location.pathname === "/explore/projects/all/") {
             window.location.href = targetPath;
         }
@@ -23,7 +23,7 @@ export default async function ({ feature, console }) {
         const exploreLink = event.currentTarget;
         const targetUrl = exploreLink.getAttribute('href');
         if (targetUrl === "/explore/projects/all/") {
-            const redirectUrl = getRedirectPath(tabName);
+            const redirectUrl = getRedirectPath(name);
             window.location.href = redirectUrl || targetUrl;
         } else {
             window.location.href = targetUrl;
@@ -40,9 +40,8 @@ export default async function ({ feature, console }) {
     });
 
     feature.settings.addEventListener("changed", function ({ key, value }) {
-        if (key === "tab-name") {
-            tabName = value;
-            ScratchTools.storage.set("tab-name", value);
+        if (key === "customtab") {
+            name = value;
             redirectToTab();
         }
     });
