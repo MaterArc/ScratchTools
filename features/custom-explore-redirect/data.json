@@ -28,7 +28,7 @@
     "options": [
         {
             "id": "custom-tab",
-            "name": "Select Tab",
+            "name": "",
             "type": 4,
             "options": [
                 {
