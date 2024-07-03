@@ -7,15 +7,7 @@ export default async function ({ feature, console }) {
 
     function getRedirectPath(name) {
         const formattedName = formatTabName(name);
-        const tabPaths = {
-            "animations": "animations",
-            "art": "art",
-            "games": "games",
-            "music": "music",
-            "stories": "stories"
-            "tutorials": "tutorials"
-        };
-        return tabPaths[formattedName] ? `/explore/projects/${tabPaths[formattedName]}/` : "/explore/projects/all/";
+        return formattedName ? `/explore/projects/${formattedName}/` : "/explore/projects/all/";
     }
 
     function redirectToTab() {
