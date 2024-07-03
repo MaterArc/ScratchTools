@@ -1,5 +1,5 @@
 export default async function({ feature, console }) {
-    let tabName = ScratchTools.Storage["Custom Explore Redirect"];
+    let tabName = ScratchTools.Storage["customtab"];
     
     function updateRedirect() {
         const exploreLink = document.querySelector('li.link.explore > a');
