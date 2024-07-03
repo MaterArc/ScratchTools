@@ -21,7 +21,7 @@
     "scripts": [
         {
             "file": "script.js",
-            "runOn": "/explore/projects/*||/*"
+            "runOn": "/explore/projects/*||/"
         }
     ],
     "dynamic": true,
