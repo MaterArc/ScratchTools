@@ -1,5 +1,5 @@
 export default async function ({ feature, console }) {
-    let name = ScratchTools.Storage.customtab;
+    let name = await feature.settings.get("customtab");
 
     function formatTabName(name) {
         return name.trim().toLowerCase();
@@ -39,9 +39,9 @@ export default async function ({ feature, console }) {
         }
     });
 
-    feature.settings.addEventListener("changed", function ({ key, value }) {
+    feature.settings.addEventListener("changed", async function ({ key, value }) {
         if (key === "customtab") {
-            name = value;
+            name = await feature.settings.get("customtab");
             redirectToTab();
         }
     });
