@@ -27,7 +27,7 @@
     "dynamic": true,
     "options": [
         {
-            "id": "tab-name",
+            "id": "customtab",
             "name": "Enter tab name",
             "type": 0
         }
