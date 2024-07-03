@@ -1,43 +1,41 @@
-let tabName;
+export default async function ({ feature, console }) {
+    let tabName = await ScratchTools.storage.get("tab-name");
 
-function TabName(name) {
-    return name.trim().toLowerCase();
-}
-
-function getRedirectPath(name) {
-    const TabName = TabName(name);
-    const tabPaths = {
-        "animations": "animations",
-        "art": "art",
-        "games": "games",
-        "music": "music",
-        "stories": "stories"
-    };
-    return tabPaths[TabName] ? `/explore/projects/${tabPaths[TabName]}/` : "/explore/projects/all/";
-}
-
-function redirectToTab() {
-    if (!tabName) return;
-    const targetPath = getRedirectPath(tabName);
-    if (window.location.pathname === "/explore/projects/all/") {
-        window.location.href = targetPath;
+    function formatTabName(name) {
+        return name.trim().toLowerCase();
     }
-}
 
-function handleExploreClick(event) {
-    event.preventDefault();
-    const exploreLink = event.currentTarget;
-    const targetUrl = exploreLink.getAttribute('href');
-    if (targetUrl === "/explore/projects/all") {
-        const redirectUrl = getRedirectPath(tabName);
-        window.location.href = redirectUrl || targetUrl;
-    } else {
-        window.location.href = targetUrl;
+    function getRedirectPath(name) {
+        const formattedName = formatTabName(name);
+        const tabPaths = {
+            "animations": "animations",
+            "art": "art",
+            "games": "games",
+            "music": "music",
+            "stories": "stories"
+        };
+        return tabPaths[formattedName] ? `/explore/projects/${tabPaths[formattedName]}/` : "/explore/projects/all/";
     }
-}
 
-export default async function (feature) {
-    tabName = feature.settings.get("tab-name");
+    function redirectToTab() {
+        if (!tabName) return;
+        const targetPath = getRedirectPath(tabName);
+        if (window.location.pathname === "/explore/projects/all/") {
+            window.location.href = targetPath;
+        }
+    }
+
+    function handleExploreClick(event) {
+        event.preventDefault();
+        const exploreLink = event.currentTarget;
+        const targetUrl = exploreLink.getAttribute('href');
+        if (targetUrl === "/explore/projects/all") {
+            const redirectUrl = getRedirectPath(tabName);
+            window.location.href = redirectUrl || targetUrl;
+        } else {
+            window.location.href = targetUrl;
+        }
+    }
 
     redirectToTab();
 
@@ -51,7 +49,12 @@ export default async function (feature) {
     feature.settings.addEventListener("changed", function ({ key, value }) {
         if (key === "tab-name") {
             tabName = value;
+            ScratchTools.storage.set("tab-name", value);
             redirectToTab();
         }
+    });
+
+    feature.addEventListener("enabled", function () {
+        redirectToTab();
     });
 }
