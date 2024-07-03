@@ -28,8 +28,8 @@
     "options": [
         {
             "id": "tab-name",
-            "name": "Enter the tab name to redirect to",
-            "type": 2
+            "name": "Enter tab name",
+            "type": 0
         }
     ]
 }
