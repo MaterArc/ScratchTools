@@ -32,10 +32,6 @@
             "type": 4,
             "options": [
                 {
-                    "name": "All",
-                    "value": "all"
-                },
-                {
                     "name": "Animations",
                     "value": "animations"
                 },
