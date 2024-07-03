@@ -29,7 +29,7 @@
         {
             "id": "customtab",
             "name": "Enter tab name",
-            "type": 0
+            "type": 4
         }
     ]
 }
