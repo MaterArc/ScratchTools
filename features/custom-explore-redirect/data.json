@@ -27,9 +27,39 @@
     "dynamic": true,
     "options": [
         {
-            "id": "customtab",
-            "name": "Enter tab name",
-            "type": 4
+            "id": "custom-tab",
+            "name": "Select Tab",
+            "type": 4,
+            "options": [
+                {
+                    "name": "All",
+                    "value": "all"
+                },
+                {
+                    "name": "Animations",
+                    "value": "animations"
+                },
+                {
+                    "name": "Art",
+                    "value": "art"
+                },
+                {
+                    "name": "Games",
+                    "value": "games"
+                },
+                {
+                    "name": "Music",
+                    "value": "music"
+                },
+                 {
+                    "name": "Stories",
+                    "value": "stories"
+                },
+                {
+                    "name": "Tutorials",
+                    "value": "tutorials"
+                }
+            ]
         }
     ]
 }
