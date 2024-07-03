@@ -1,0 +1,35 @@
+{
+    "title": "Custom Explore Redirect",
+    "description": "Automatically redirect to a specific tab on the Explore page.",
+    "credits": [
+        {
+            "username": "ItsThatKittyDragon",
+            "url": "https://scratch.mit.edu/users/ItsThatKittyDragon/"
+        },
+        {
+            "username": "MaterArc",
+            "url": "https://scratch.mit.edu/users/MaterArc/"
+        }
+    ],
+    "type": [
+        "Website"
+    ],
+    "tags": [
+        "New",
+        "Featured"
+    ],
+    "scripts": [
+        {
+            "file": "script.js",
+            "runOn": "/explore/*"
+        }
+    ],
+    "dynamic": true,
+    "options": [
+        {
+            "id": "tab-name",
+            "name": "Enter the tab name to redirect to",
+            "type": 2
+        }
+    ]
+}
