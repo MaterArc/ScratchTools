@@ -1,0 +1,29 @@
+{
+  "title": "Live Comments",
+  "description": "Displays comments in real-time!",
+  "credits": [
+    {
+      "username": "MeechaPooch",
+      "url": "https://scratch.mit.edu/users/ilhp10/"
+    }
+  ],
+  "type": ["Website"],
+  "tags": ["New", "Featured"],
+  "dynamic": true,
+  "scripts": [
+    {
+      "file": "profiles.js",
+      "runOn": "/users/*"
+    },
+    {
+      "file": "projects-studios.js",
+      "runOn": "/projects/*||/studios/*"
+    }
+  ],
+  "styles": [
+    {
+      "file": "style.css",
+      "runOn": "/projects/*||/users/*||/studios/*"
+    }
+  ]
+}
