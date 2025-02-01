@@ -1,14 +1,11 @@
 export default async function ({ feature }) {
   const locationElement = await ScratchTools.waitForElement(
-    "p.profile-details > span.location"
+    "p.profile-details > span.location:first-of-type"
   );
 
   if (!locationElement) return;
 
-  const locationText = locationElement.cloneNode(true);
-  locationText.querySelector(".sa-ocular-status")?.remove();
-  const countryName = locationText.textContent.trim();
-
+  const countryName = locationElement.textContent.trim();
   if (!countryName) return;
 
   const countryFlag = getCountryFlag(countryName);
