@@ -3,8 +3,15 @@ export default async function ({ feature }) {
     "p.profile-details > span.location"
   );
 
-  const locationText = locationElement.textContent.trim();
-  const countryFlag = getCountryFlag(locationText);
+  if (!locationElement) return;
+
+  const locationText = locationElement.cloneNode(true);
+  locationText.querySelector(".sa-ocular-status")?.remove();
+  const countryName = locationText.textContent.trim();
+
+  if (!countryName) return;
+
+  const countryFlag = getCountryFlag(countryName);
   if (!countryFlag) return;
 
   const imgElement = new Image();
@@ -16,16 +23,22 @@ export default async function ({ feature }) {
     order: -1,
   });
 
-  feature.self.hideOnDisable(locationHolder);
+  feature.self.hideOnDisable(locationElement);
 
-  function getCountryFlag(locationText) {
-    const GithubUrl = "https://raw.githubusercontent.com/STForScratch/data/main/flags/";
-    const countryName = locationText.toLowerCase()
-      .replaceAll(" ", "-")
-      .replaceAll("(", "")
-      .replaceAll(")", "")
-      .replaceAll(",", "")
-      .replaceAll(".", "") + ".svg";
-    return GithubUrl + countryName;
+  function getCountryFlag(countryName) {
+    const GithubUrl =
+      "https://raw.githubusercontent.com/STForScratch/data/main/flags/";
+    return (
+      GithubUrl +
+      countryName
+        .toLowerCase()
+        .replaceAll(" ", "-")
+        .replaceAll("(", "")
+        .replaceAll(")", "")
+        .replaceAll(",", "")
+        .replaceAll(".", "") +
+      ".svg"
+    );
   }
+}
 }
