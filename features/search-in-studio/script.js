@@ -13,10 +13,8 @@ export default async function ({ feature, console }) {
     const titleTokens = tokenize(title);
     const phrase = searchTokens.join(" ");
     const titleString = titleTokens.join(" ");
-
     if (titleString.includes(phrase)) {
       const startIndex = titleString.indexOf(phrase);
-
       return startIndex === 0 ? 2 : 1;
     }
     return 0;
@@ -34,12 +32,11 @@ export default async function ({ feature, console }) {
 
   function searchProject(searchText) {
     const searchTokens = tokenize(searchText.trim());
-
     const exactMatchProjects = projects
       .map((project) => ({
         project,
         score: computeExactPhraseScore(
-          projectDetailsMap[project.id].title.toLowerCase(),
+          projectDetailsMap[project.id]?.title?.toLowerCase() || "",
           searchTokens
         ),
       }))
@@ -52,7 +49,7 @@ export default async function ({ feature, console }) {
         .map((project) => ({
           project,
           score: computeSingleWordScore(
-            projectDetailsMap[project.id].title.toLowerCase(),
+            projectDetailsMap[project.id]?.title?.toLowerCase() || "",
             searchTokens[0]
           ),
         }))
@@ -60,41 +57,51 @@ export default async function ({ feature, console }) {
         .sort((a, b) => b.score - a.score)
         .map(({ project }) => project);
 
-      const combinedResults = [...exactMatchProjects, ...singleWordProjects];
+      const combinedResults = [...new Set([...exactMatchProjects, ...singleWordProjects])];
       updateProjectContainer(combinedResults);
     } else {
-      updateProjectContainer(exactMatchProjects);
+      updateProjectContainer([...new Set(exactMatchProjects)]);
     }
   }
 
   function injectSearchBar() {
-    const headerContainer = document.querySelector(".studio-header-container");
+    const url = window.location.href;
 
-    if (!headerContainer) {
+    if (!url.match(/^https:\/\/scratch\.mit\.edu\/studios\/\d+$/)) {
       return;
     }
 
-    const searchContainer = document.createElement("div");
-    searchContainer.className = "search-container";
+    ScratchTools.waitForElements(".studio-header-container", (headerContainer) => {
+      if (!headerContainer) return;
 
-    const searchInput = document.createElement("input");
-    searchInput.type = "text";
-    searchInput.className = "search-bar";
-    searchInput.id = "projectSearch";
-    searchInput.placeholder = "Search projects...";
+      if (document.querySelector(".search-container")) return;
 
-    searchContainer.appendChild(searchInput);
-    headerContainer.appendChild(searchContainer);
-  }
+      const searchContainer = document.createElement("div");
+      searchContainer.className = "search-container";
 
-  function getStudioIdFromUrl() {
-    const url = window.location.href;
-    const matches = url.match(/studios\/(\d+)/);
-    return matches ? matches[1] : null;
+      const searchInput = document.createElement("input");
+      searchInput.type = "text";
+      searchInput.className = "search-bar";
+      searchInput.id = "projectSearch";
+      searchInput.placeholder = "Search projects...";
+
+      searchContainer.appendChild(searchInput);
+      headerContainer.appendChild(searchContainer);
+
+      searchInput.addEventListener("input", () => {
+        const searchText = searchInput.value;
+        if (searchText.trim() === "") {
+          updateProjectContainer(projects);
+        } else {
+          searchProject(searchText);
+        }
+      });
+    });
   }
 
   async function fetchAllStudioProjects(studioId) {
-    let projects = [];
+    let fetchedProjects = [];
+    let projectIds = new Set();
     let offset = 0;
     const limit = 40;
 
@@ -106,11 +113,17 @@ export default async function ({ feature, console }) {
 
       if (data.length === 0) break;
 
-      projects = projects.concat(data);
+      for (const project of data) {
+        if (!projectIds.has(project.id)) {
+          projectIds.add(project.id);
+          fetchedProjects.push(project);
+        }
+      }
+
       offset += limit;
     }
 
-    return projects;
+    return fetchedProjects;
   }
 
   async function getProjectDetails(projectId) {
@@ -121,72 +134,79 @@ export default async function ({ feature, console }) {
   }
 
   async function updateProjectContainer(filteredProjects) {
-    const container = document.querySelector(".studio-projects-grid");
+    ScratchTools.waitForElements(".studio-projects-grid", async (container) => {
+      if (!container) return;
 
-    if (!container) {
-      return;
-    }
+      container.innerHTML = "";
 
-    container.innerHTML = "";
+      const uniqueProjects = [];
+      const projectIds = new Set();
 
-    if (filteredProjects.length === 0) {
-      return;
-    }
+      for (const project of filteredProjects) {
+        if (!projectIds.has(project.id)) {
+          projectIds.add(project.id);
+          uniqueProjects.push(project);
+        }
+      }
 
-    for (const project of filteredProjects) {
-      const projectDetails = await getProjectDetails(project.id);
+      if (uniqueProjects.length === 0) return;
 
-      const projectTile = document.createElement("div");
-      projectTile.className = "studio-project-tile";
+      for (const project of uniqueProjects) {
+        const projectDetails = projectDetailsMap[project.id] || await getProjectDetails(project.id);
+        projectDetailsMap[project.id] = projectDetails;
 
-      const projectLink = document.createElement("a");
-      projectLink.href = `/projects/${project.id}/`;
+        const projectTile = document.createElement("div");
+        projectTile.className = "studio-project-tile";
 
-      const projectImage = document.createElement("img");
-      projectImage.className = "studio-project-image";
-      projectImage.src = projectDetails.image || "";
+        const projectLink = document.createElement("a");
+        projectLink.href = `/projects/${project.id}/`;
 
-      const projectBottom = document.createElement("div");
-      projectBottom.className = "studio-project-bottom";
+        const projectImage = document.createElement("img");
+        projectImage.className = "studio-project-image";
+        projectImage.src = projectDetails.image || "";
 
-      const userLink = document.createElement("a");
-      userLink.href = `/users/${projectDetails.author.username}/`;
+        const projectBottom = document.createElement("div");
+        projectBottom.className = "studio-project-bottom";
 
-      const userImage = document.createElement("img");
-      userImage.className = "studio-project-avatar";
-      userImage.src = `https://cdn2.scratch.mit.edu/get_image/user/${projectDetails.author.id}_90x90.png`; //
+        const userLink = document.createElement("a");
+        userLink.href = `/users/${projectDetails.author.username}/`;
 
-      const projectInfo = document.createElement("div");
-      projectInfo.className = "studio-project-info";
+        const userImage = document.createElement("img");
+        userImage.className = "studio-project-avatar";
+        userImage.src = `https://cdn2.scratch.mit.edu/get_image/user/${projectDetails.author.id}_90x90.png`;
 
-      const projectTitle = document.createElement("a");
-      projectTitle.className = "studio-project-title";
-      projectTitle.href = `/projects/${project.id}/`;
-      projectTitle.textContent = projectDetails.title;
+        const projectInfo = document.createElement("div");
+        projectInfo.className = "studio-project-info";
 
-      const projectUsername = document.createElement("div");
-      projectUsername.className = "studio-project-username";
-      projectUsername.textContent = projectDetails.author.username;
+        const projectTitle = document.createElement("a");
+        projectTitle.className = "studio-project-title";
+        projectTitle.href = `/projects/${project.id}/`;
+        projectTitle.textContent = projectDetails.title;
 
-      projectLink.appendChild(projectImage);
-      projectTile.appendChild(projectLink);
+        const projectUsername = document.createElement("div");
+        projectUsername.className = "studio-project-username";
+        projectUsername.textContent = projectDetails.author.username;
 
-      userLink.appendChild(userImage);
-      projectInfo.appendChild(projectTitle);
-      projectInfo.appendChild(projectUsername);
-      projectBottom.appendChild(userLink);
-      projectBottom.appendChild(projectInfo);
-      projectTile.appendChild(projectBottom);
+        projectLink.appendChild(projectImage);
+        projectTile.appendChild(projectLink);
 
-      container.appendChild(projectTile);
-    }
+        userLink.appendChild(userImage);
+        projectInfo.appendChild(projectTitle);
+        projectInfo.appendChild(projectUsername);
+        projectBottom.appendChild(userLink);
+        projectBottom.appendChild(projectInfo);
+        projectTile.appendChild(projectBottom);
+
+        container.appendChild(projectTile);
+      }
+    });
   }
 
   async function searchAndDisplayProjects() {
     const studioId = getStudioIdFromUrl();
-    if (!studioId) {
-      return;
-    }
+    if (!studioId) return;
+
+    injectSearchBar();
 
     projects = await fetchAllStudioProjects(studioId);
 
@@ -195,19 +215,14 @@ export default async function ({ feature, console }) {
       projectDetailsMap[project.id] = await getProjectDetails(project.id);
     }
 
-    const searchBar = document.getElementById("projectSearch");
-    searchBar.addEventListener("input", () => {
-      const searchText = searchBar.value;
-      if (searchText.trim() === "") {
-        updateProjectContainer(projects);
-      } else {
-        searchProject(searchText);
-      }
-    });
-
     updateProjectContainer(projects);
   }
 
-  injectSearchBar();
+  function getStudioIdFromUrl() {
+    const url = window.location.href;
+    const matches = url.match(/studios\/(\d+)/);
+    return matches ? matches[1] : null;
+  }
+
   searchAndDisplayProjects();
 }
