@@ -1,6 +1,9 @@
 if (window.location.href.includes("https://scratch.mit.edu/projects/")) {
   checkSubactions();
 
+  let isFocusMode = false;
+  let removedElements = {};
+
   function checkSubactions() {
     if (
       document.querySelector(
@@ -18,12 +21,9 @@ if (window.location.href.includes("https://scratch.mit.edu/projects/")) {
     btn.className = "button focusMode";
     btn.textContent = "Focus Mode";
     btn.onclick = function () {
-      document.querySelector("#footer").remove();
-      document.querySelector("#navigation").remove();
-      document
-        .querySelector("#view > div > div.project-lower-container")
-        .remove();
+      toggleFocusMode();
     };
+
     if (document.querySelector("button.focusMode") === null) {
       document
         .querySelector(
@@ -31,5 +31,37 @@ if (window.location.href.includes("https://scratch.mit.edu/projects/")) {
         )
         .appendChild(btn);
     }
+  }
+
+  function toggleFocusMode() {
+    if (!isFocusMode) {
+      removedElements.footer = document.querySelector("#footer");
+      removedElements.navigation = document.querySelector("#navigation");
+      removedElements.projectLowerContainer = document.querySelector(
+        "#view > div > div.project-lower-container"
+      );
+
+      removedElements.footer?.remove();
+      removedElements.navigation?.remove();
+      removedElements.projectLowerContainer?.remove();
+
+      document.querySelector(".focusMode").textContent = "Exit Focus Mode";
+    } else {
+      if (removedElements.footer) {
+        document.body.appendChild(removedElements.footer);
+      }
+      if (removedElements.navigation) {
+        document.body.insertBefore(removedElements.navigation, document.body.firstChild);
+      }
+      if (removedElements.projectLowerContainer) {
+        document
+          .querySelector("#view > div > div.inner")
+          .appendChild(removedElements.projectLowerContainer);
+      }
+
+      document.querySelector(".focusMode").textContent = "Focus Mode";
+    }
+
+    isFocusMode = !isFocusMode;
   }
 }
