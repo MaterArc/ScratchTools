@@ -1,75 +1,45 @@
 export default async function ({ feature, console }) {
   await ScratchTools.waitForElement(".project-buttons");
+
   let auth = await feature.auth.fetch();
   let username = feature.redux.getState().preview.projectInfo.author.username;
-  let data = await (
-    await fetch(`https://scratch.mit.edu/users/${username}/?ste=${Date.now().toString()}`)
-  ).text();
-
-  let html = document.createElement("html");
-  html.innerHTML = data.split('<div id="follow-button" class="buttons">')[1]
-    .split(`</div>
-    
-  </div>
-  <div class="box-content" id="profile-box">`)[0];
-  let following = !!html.querySelector("div[data-control=unfollow");
+  
+  let response = await fetch(`https://scratch.mit.edu/users/${username}/?t=${Date.now()}`);
+  let pageText = await response.text();
+  let isFollowing = pageText.includes('data-control="unfollow"');
 
   if (!document.querySelector(".ste-follow-btn")) {
     let button = document.createElement("button");
-    button.className =
-      "ste-follow-btn button " + (following ? "following" : "notfollowing");
+    button.className = `ste-follow-btn button ${isFollowing ? "following" : "notfollowing"}`;
     let span = document.createElement("span");
-    span.textContent = (following ? "Unfollow" : "Follow") + " " + username;
-    button.append(span)
+    span.textContent = (isFollowing ? "Unfollow" : "Follow") + " " + username;
+    button.appendChild(span);
+
     button.addEventListener("click", async function () {
-      if (following) {
-        following = false;
-        button.className =
-      "ste-follow-btn button " + (following ? "following" : "notfollowing");
-        span.textContent =
-          (following ? "Unfollow" : "Follow") + " " + username;
-        let data = await (
-          await fetch(
-            "https://scratch.mit.edu/site-api/users/followers/rgantzosTEST/remove/?usernames=" +
-              auth.user.username,
-            {
-              headers: {
-                "x-csrftoken": "VZ0lgYGuLZzG5nD4nNirmbbze7CulCmP",
-                "x-requested-with": "XMLHttpRequest",
-              },
-              referrer: "https://scratch.mit.edu/users/" + username + "/",
-              body: '{"id":"' + username + '"}',
-              method: "PUT",
-              mode: "cors",
-              credentials: "include",
-            }
-          )
-        ).json();
-      } else {
-        following = true;
-        button.className =
-      "ste-follow-btn button " + (following ? "following" : "notfollowing");
-        span.textContent =
-          (following ? "Unfollow" : "Follow") + " " + username;
-        let data = await (
-          await fetch(
-            "https://scratch.mit.edu/site-api/users/followers/rgantzosTEST/add/?usernames=" +
-              auth.user.username,
-            {
-              headers: {
-                "x-csrftoken": "VZ0lgYGuLZzG5nD4nNirmbbze7CulCmP",
-                "x-requested-with": "XMLHttpRequest",
-              },
-              referrer: "https://scratch.mit.edu/users/" + username + "/",
-              body: '{"id":"' + username + '"}',
-              method: "PUT",
-              mode: "cors",
-              credentials: "include",
-            }
-          )
-        ).json();
+      let csrfResponse = await fetch("https://scratch.mit.edu/csrf_token/");
+      let csrfToken = (await csrfResponse.json()).token;
+
+      let method = isFollowing ? "remove" : "add";
+      let apiUrl = `https://scratch.mit.edu/site-api/users/followers/${username}/${method}/`;
+
+      let followResponse = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "x-csrftoken": csrfToken,
+          "x-requested-with": "XMLHttpRequest",
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ id: username }),
+      });
+
+      if (followResponse.ok) {
+        isFollowing = !isFollowing;
+        button.className = `ste-follow-btn button ${isFollowing ? "following" : "notfollowing"}`;
+        span.textContent = (isFollowing ? "Unfollow" : "Follow") + " " + username;
       }
     });
+
     ScratchTools.appendToSharedSpace({
       space: "beforeRemixButton",
       order: 0,
