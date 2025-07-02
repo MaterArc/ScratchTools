@@ -1,0 +1,25 @@
+{
+    "title": "Follower Rank",
+    "description": "Displays a user's global and country follower rank on their followers page.",
+    "credits": [
+      {
+        "username": "MaterArc",
+        "url": "https://scratch.mit.edu/users/MaterArc/"
+      }
+    ],
+    "type": ["Website"],
+    "tags": ["New", "Featured"],
+    "dynamic": true,
+    "styles": [
+      {
+        "file": "style.css",
+        "runOn": "/users/*/followers"
+      }
+    ],
+    "scripts": [
+      {
+        "file": "script.js",
+        "runOn": "/users/*/followers"
+      }
+    ]
+  }  
